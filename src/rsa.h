@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdbool.h>
+
+#include "../lib/lib.hpp"
 
 
 #define RETURN_SUCCES 1

@@ -17,6 +17,7 @@ In consequence, do not use those keypairs for real life purpose !
 
 
 struct RSA_KEYPAIR {
+    int key_size;
     BIGNUM *public_modulus;         
     BIGNUM *public_exponent;      
     BIGNUM *private_exponent; 
@@ -28,6 +29,7 @@ struct RSA_KEYPAIR {
 
 /* ASN.1 type RSAPrivateKey
 RSAPrivateKey ::= SEQUENCE {
+    modulus_size    Integer, --nBits
     modulus         BIGNUM, -- n
     publicExponent  BIGNUM, -- e
     privateExponent BIGNUM, -- d
@@ -52,6 +54,16 @@ int generate_private_exponent(struct RSA_KEYPAIR *kp_struct) {
 
 int generate_primes_factors(struct RSA_KEYPAIR *kp_struct) {
     //Pickup two random number until they are both primes
+    BIGNUM *candidate;
+    bool round = 0;
+
+    while (round == 0) {
+        BN_rand(candidate, kp_struct->key_size/2, -1, 0);
+        if (!(BN_is_odd(candidate))) 
+            BN_add(candidate, candidate, BN_value_one());
+
+        BN_free(candidate);
+    }
     return RETURN_SUCCES;
 }
 
@@ -64,19 +76,34 @@ int rsa_generation(int e, int key_size) {
         return RETURN_FAILURE;
     }
 
-    if (e < MIN_E_VALUE || e > MAX_E_VALUE) {
-        printf ("[!] Incorrect public exponent. It shall be in the range of [2**16, 2**256]\n");
+    if (e < MIN_E_VALUE || e > MAX_E_VALUE || e%2 == 1) {
+        printf ("[!] Incorrect public exponent. e shall be in the range of [2**16, 2**256] and odd\n");
         return RETURN_FAILURE;
     } 
 
     struct RSA_KEYPAIR *kp_struct = &(struct RSA_KEYPAIR) {};
     BN_CTX *tmp_var = BN_CTX_new();
 
-    //init public exponent
+    //put len of the key in KEYPAIR struct
+    kp_struct->key_size = key_size;
+
+    //put public exponent in the KEYPAIR struct
     char chaine[100];
     snprintf(chaine, 100, "%d", e);
     BN_hex2bn(&kp_struct->public_exponent, chaine);
 
+
+    //generate prime factors p and q
+    generate_primes_factors(kp_struct);
+
+
+    //compute phi number as phi(N) = (p-1) * (q-1)
+
+
+    //compute private exponent
+    generate_private_exponent(kp_struct);
+
+    //pass consistency test
     consistency_test(kp_struct);
 
     return RETURN_SUCCES;
