@@ -12,6 +12,10 @@ In consequence, do not use those keypairs for real life purpose !
 */
 
 
+#define MIN_E_VALUE pow(2, 16)
+#define MAX_E_VALUE pow(2, 256)
+
+
 struct RSA_KEYPAIR {
     BIGNUM *public_modulus;         
     BIGNUM *public_exponent;      
@@ -24,13 +28,13 @@ struct RSA_KEYPAIR {
 
 /* ASN.1 type RSAPrivateKey
 RSAPrivateKey ::= SEQUENCE {
-    modulus         INTEGER, -- n
-    publicExponent  INTEGER, -- e
-    privateExponent INTEGER, -- d
-    prime1          INTEGER, -- p
-    prime2          INTEGER, -- q
-    crt exponent1   INTEGER, -- d mod (p-1)
-    crt exponent2   INTEGER, -- d mod (q-1)
+    modulus         BIGNUM, -- n
+    publicExponent  BIGNUM, -- e
+    privateExponent BIGNUM, -- d
+    prime1          BIGNUM, -- p
+    prime2          BIGNUM, -- q
+    crt exponent1   BIGNUM, -- d mod (p-1)
+    crt exponent2   BIGNUM, -- d mod (q-1)
 */
 
 
@@ -54,5 +58,26 @@ int generate_primes_factors(struct RSA_KEYPAIR *kp_struct) {
 
 int rsa_generation(int e, int key_size) {
     //main function that call the function that generate the keypair
+
+    if (key_size < 2048 || key_size > 8192) {
+        printf("[!] Incorrect key size. Available key size are between 2048 and 8192 included\n");
+        return RETURN_FAILURE;
+    }
+
+    if (e < MIN_E_VALUE || e > MAX_E_VALUE) {
+        printf ("[!] Incorrect public exponent. It shall be in the range of [2**16, 2**256]\n");
+        return RETURN_FAILURE;
+    } 
+
+    struct RSA_KEYPAIR *kp_struct = &(struct RSA_KEYPAIR) {};
+    BN_CTX *tmp_var = BN_CTX_new();
+
+    //init public exponent
+    char chaine[100];
+    snprintf(chaine, 100, "%d", e);
+    BN_hex2bn(&kp_struct->public_exponent, chaine);
+
+    consistency_test(kp_struct);
+
     return RETURN_SUCCES;
 }

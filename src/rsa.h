@@ -4,6 +4,7 @@
 #include <openssl/bn.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 
 #define RETURN_SUCCES 1
