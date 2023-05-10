@@ -11,6 +11,6 @@
 
 int bn_to_int(BIGNUM *a);
 int binary_gcd(BIGNUM *sto, BIGNUM *a, BIGNUM *b);
-int miller_rabin_primality_test(int prime_size, int round);
+int miller_rabin_primality_test(BIGNUM *p, int prime_size);
 
 #endif

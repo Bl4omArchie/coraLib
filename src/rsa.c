@@ -54,16 +54,38 @@ int generate_private_exponent(struct RSA_KEYPAIR *kp_struct) {
 
 int generate_primes_factors(struct RSA_KEYPAIR *kp_struct) {
     //Pickup two random number until they are both primes
-    BIGNUM *candidate;
+    BIGNUM *candidate = BN_new();
+    BIGNUM *tmp_value_O = BN_new();
+    BIGNUM *tmp_value_S = BN_new();
+
     bool round = 0;
 
+    BN_set_word(tmp_value_O, sqrt(2)*pow(2, kp_struct->key_size/2-1));    //this value is used at section 4.4
+    BN_set_word(tmp_value_S, pow(2, kp_struct->key_size/2-100))
+    
     while (round == 0) {
         BN_rand(candidate, kp_struct->key_size/2, -1, 0);
         if (!(BN_is_odd(candidate))) 
             BN_add(candidate, candidate, BN_value_one());
+        
+        
+        if (BN_cmp(candidate, tmp_value_O) == -1) 
+            continue;
 
-        BN_free(candidate);
+        if (binary_gcd( , kp_struct->public_exponent) == 1) {
+            if (miller_rabin_primality_test(candidate, kp_struct->key_size) == 1) {
+                kp_struct->p_factor = candidate;
+                break;
+            }
+        }
+
+        BN_clear(candidate);
     }
+
+    //final clear
+    BN_free(candidate);
+    BN_free(tmp_value_O);
+
     return RETURN_SUCCES;
 }
 
@@ -71,7 +93,7 @@ int generate_primes_factors(struct RSA_KEYPAIR *kp_struct) {
 int rsa_generation(int e, int key_size) {
     //main function that call the function that generate the keypair
 
-    if (key_size < 2048 || key_size > 8192) {
+    if (key_size < 2048 || key_size > 8192 || key_size%2 == 0) {
         printf("[!] Incorrect key size. Available key size are between 2048 and 8192 included\n");
         return RETURN_FAILURE;
     }
@@ -82,15 +104,12 @@ int rsa_generation(int e, int key_size) {
     } 
 
     struct RSA_KEYPAIR *kp_struct = &(struct RSA_KEYPAIR) {};
-    BN_CTX *tmp_var = BN_CTX_new();
 
     //put len of the key in KEYPAIR struct
     kp_struct->key_size = key_size;
 
     //put public exponent in the KEYPAIR struct
-    char chaine[100];
-    snprintf(chaine, 100, "%d", e);
-    BN_hex2bn(&kp_struct->public_exponent, chaine);
+    BN_set_word(kp_struct->public_exponent, e);
 
 
     //generate prime factors p and q

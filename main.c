@@ -10,7 +10,6 @@ Arguments:
 
 The key size shall be between 2048 and 8192 with both number include
 The public exponent e shall be between 2^16 and 2^256. 
-The number is also represented as an hexadecimal number. (ie: if you use 65537, the number e is actually equalt to 415031)
 */
 
 
