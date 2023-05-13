@@ -51,43 +51,33 @@ int generate_private_exponent(struct RSA_KEYPAIR *kp_struct) {
     return RETURN_SUCCES;
 }
 
-
 int generate_primes_factors(struct RSA_KEYPAIR *kp_struct) {
-    //Pickup two random number until they are both primes
+    BIGNUM *tmp_value_T = BN_new();
+    BIGNUM *tmp_value_F = BN_new();
     BIGNUM *candidate = BN_new();
-    BIGNUM *tmp_value_O = BN_new();
-    BIGNUM *tmp_value_S = BN_new();
 
-    bool round = 0;
+    generate_random_prime(kp_struct->key_size, candidate, kp_struct->public_exponent);
+    BN_copy(kp_struct->p_factor, candidate);
+    BN_clear(candidate);
 
-    BN_set_word(tmp_value_O, sqrt(2)*pow(2, kp_struct->key_size/2-1));    //this value is used at section 4.4
-    BN_set_word(tmp_value_S, pow(2, kp_struct->key_size/2-100))
-    
-    while (round == 0) {
-        BN_rand(candidate, kp_struct->key_size/2, -1, 0);
-        if (!(BN_is_odd(candidate))) 
-            BN_add(candidate, candidate, BN_value_one());
-        
-        
-        if (BN_cmp(candidate, tmp_value_O) == -1) 
-            continue;
-
-        if (binary_gcd( , kp_struct->public_exponent) == 1) {
-            if (miller_rabin_primality_test(candidate, kp_struct->key_size) == 1) {
-                kp_struct->p_factor = candidate;
-                break;
-            }
-        }
-
+    BN_set_word(tmp_value_T, pow(2, kp_struct->key_size/2-100));
+    while (1) {
+        generate_random_prime(kp_struct->key_size, candidate, kp_struct->public_exponent);
+        BN_sub(tmp_value_F, kp_struct->p_factor, candidate);
+        if (BN_cmp(tmp_value_F, tmp_value_T) == 1) {
+            BN_copy(kp_struct->q_factor, candidate);
+            break;
+        } 
         BN_clear(candidate);
     }
-
-    //final clear
+    
     BN_free(candidate);
-    BN_free(tmp_value_O);
+    BN_free(tmp_value_T);
+    BN_free(tmp_value_F);
 
     return RETURN_SUCCES;
 }
+
 
 
 int rsa_generation(int e, int key_size) {
