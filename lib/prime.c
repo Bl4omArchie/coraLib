@@ -4,13 +4,14 @@
 #define MR_ROUND 10;
 
 int generate_random_prime(int key_size, BIGNUM *candidate, BIGNUM *public_exponent) {
-    //Pickup two random number until they are both primes
     BIGNUM *tmp_value_O = BN_new();
     BIGNUM *tmp_value_S = BN_new();
 
 
     BN_set_word(tmp_value_O, sqrt(2)*pow(2, key_size/2-1));    //this value is used at section 4.4
     
+
+    //pick a random number and repeat operation until the number if prime
     while (1) {
         BN_rand(candidate, key_size/2, -1, 0);
         if (!(BN_is_odd(candidate))) 
@@ -26,18 +27,20 @@ int generate_random_prime(int key_size, BIGNUM *candidate, BIGNUM *public_expone
                 break;
             
         }
+        //clear memory so we use again those variable
         BN_clear(tmp_value_S);
         BN_clear(candidate);
     }
 
-    //final clear
+    //free memory of sensitive data
     BN_free(tmp_value_O);
     BN_free(tmp_value_S);
 
     return RETURN_SUCCES;
 }
 
+
 int miller_rabin_primality_test(BIGNUM *p, int prime_size) {
-    //Verify if a given number is a prime number
+    //Verify if a given number prime
     return RETURN_SUCCES;
 }

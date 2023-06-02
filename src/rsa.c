@@ -17,7 +17,7 @@ In consequence, do not use those keypairs for real life purpose !
 
 
 struct RSA_KEYPAIR {
-    int key_size;
+    int modulus_size;
     BIGNUM *public_modulus;         
     BIGNUM *public_exponent;      
     BIGNUM *private_exponent; 
@@ -37,6 +37,7 @@ RSAPrivateKey ::= SEQUENCE {
     prime2          BIGNUM, -- q
     crt exponent1   BIGNUM, -- d mod (p-1)
     crt exponent2   BIGNUM, -- d mod (q-1)
+}
 */
 
 
@@ -51,26 +52,34 @@ int generate_private_exponent(struct RSA_KEYPAIR *kp_struct) {
     return RETURN_SUCCES;
 }
 
-int generate_primes_factors(struct RSA_KEYPAIR *kp_struct) {
+
+
+int get_primes_factors(struct RSA_KEYPAIR *kp_struct) {
     BIGNUM *tmp_value_T = BN_new();
     BIGNUM *tmp_value_F = BN_new();
     BIGNUM *candidate = BN_new();
-
-    generate_random_prime(kp_struct->key_size, candidate, kp_struct->public_exponent);
+    
+    //get first prime factor
+    generate_random_prime(kp_struct->modulus_size, candidate, kp_struct->public_exponent);
     BN_copy(kp_struct->p_factor, candidate);
     BN_clear(candidate);
 
-    BN_set_word(tmp_value_T, pow(2, kp_struct->key_size/2-100));
+
+    //get second prime factor
+    BN_set_word(tmp_value_T, pow(2, kp_struct->modulus_size/2-100));
     while (1) {
-        generate_random_prime(kp_struct->key_size, candidate, kp_struct->public_exponent);
+        generate_random_prime(kp_struct->modulus_size, candidate, kp_struct->public_exponent);
         BN_sub(tmp_value_F, kp_struct->p_factor, candidate);
-        if (BN_cmp(tmp_value_F, tmp_value_T) == 1) {
+        
+        if (BN_cmp(tmp_value_F, tmp_value_T) == 1) {    //specific condition that need both primes factors
             BN_copy(kp_struct->q_factor, candidate);
             break;
         } 
         BN_clear(candidate);
     }
     
+
+    //free memory of sensitive data
     BN_free(candidate);
     BN_free(tmp_value_T);
     BN_free(tmp_value_F);
@@ -80,15 +89,15 @@ int generate_primes_factors(struct RSA_KEYPAIR *kp_struct) {
 
 
 
-int rsa_generation(int e, int key_size) {
+int rsa_generation(int e, int modulus_size) {
     //main function that call the function that generate the keypair
 
-    if (key_size < 2048 || key_size > 8192 || key_size%2 == 0) {
+    if (modulus_size < 2048 || modulus_size > 8192 || modulus_size%2 == 0) {
         printf("[!] Incorrect key size. Available key size are between 2048 and 8192 included\n");
         return RETURN_FAILURE;
     }
 
-    if (e < MIN_E_VALUE || e > MAX_E_VALUE || e%2 == 1) {
+    if (e < MIN_E_VALUE || e > MAX_E_VALUE || e%2 == 0) {
         printf ("[!] Incorrect public exponent. e shall be in the range of [2**16, 2**256] and odd\n");
         return RETURN_FAILURE;
     } 
@@ -96,14 +105,14 @@ int rsa_generation(int e, int key_size) {
     struct RSA_KEYPAIR *kp_struct = &(struct RSA_KEYPAIR) {};
 
     //put len of the key in KEYPAIR struct
-    kp_struct->key_size = key_size;
+    kp_struct->modulus_size = modulus_size;
 
     //put public exponent in the KEYPAIR struct
     BN_set_word(kp_struct->public_exponent, e);
 
 
     //generate prime factors p and q
-    generate_primes_factors(kp_struct);
+    get_primes_factors(kp_struct);
 
 
     //compute phi number as phi(N) = (p-1) * (q-1)

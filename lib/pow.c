@@ -31,7 +31,7 @@ BIGNUM *binary_exponentiation(BIGNUM *a, BIGNUM *b) {
     BIGNUM *diff = BN_new();
     
     while (!BN_is_zero(a)) {
-        BN_rshift(a, a, az);
+        BN_rshift(a, a, *az);
         BN_sub(diff, b, a);
         az = BN_num_bits(diff) - BN_get_bit(diff, 0);
         BN_copy(b, BN_min(a, b));

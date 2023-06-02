@@ -5,10 +5,17 @@ This implementation will reach another level with the use of Bignum and more mat
 
 I also plan to code the project with parallel programming and maybe later to make the computing done by GPU with CUDA language.
 
+To resume, this project intends to implement:
+- a function that generate an RSA keypair
+- a function that generate prime numbers
+- test that verify the validity of the RSA keypair (consistency test)
+- several arithmetic functions (ie: gcd, fast exponentiation, lcm...)
+
+And also other side features like OAEP and PKCS encryption/signing scheme.
+
 ##  Installation
 
 Install the demo: ```git clone https://github.com/Bl4omArchie/CoraLib.git``` 
-
 
 
 ## Plan

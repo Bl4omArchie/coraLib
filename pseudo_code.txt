@@ -1,0 +1,35 @@
+Function rsa_generation(int e, int modulus_size)
+
+Test:
+- Verify that the modulus_size is between 2048 and 4096
+- Verify the public exponent (e) such as e is odd and between 2^16 and 2^256
+
+
+Initiate:
+- struct RSA_KEYPAIR
+
+Algorithm:
+1) put modulus_size in RSA_KEYPAIR
+2) put public exponent in RSA_KEYPAIR
+3) generate_primes_factors
+
+Return:
+1) If success: RETURN_SUCCES (=1)
+2) If failure: RETURN_FAILURE (=0)
+
+
+===========================================================================
+
+Function generate_primes_factors(struct RSA_KEYPAIR)
+
+External function:
+- Random number generator: a function that return a random BIGNUM number
+
+Initiate:
+- BIGNUM temporary_value_1
+- BIGNUM temporary_value_2
+- BIGNUM candidate
+
+Algorithm:
+1) put a BIGNUM number randomly in candidate using an RNG
+2) 

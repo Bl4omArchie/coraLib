@@ -17,7 +17,7 @@ struct RSA_KEYPAIR;
 
 int consistency_test(struct RSA_KEYPAIR *kp_struct);
 int generate_private_exponent(struct RSA_KEYPAIR *kp_struct);
-int generate_primes_factors(struct RSA_KEYPAIR *kp_struct);
+int get_primes_factors(struct RSA_KEYPAIR *kp_struct);
 int rsa_generation(int e, int key_size);
 
 #endif
